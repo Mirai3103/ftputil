@@ -1,0 +1,4 @@
+InquirerPy
+loguru
+requests
+pyinstaller
