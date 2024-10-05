@@ -6,3 +6,5 @@ main.build
 dist1
 main.dist
 main.onefile-build
+main
+main.bins
