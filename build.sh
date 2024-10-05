@@ -4,3 +4,4 @@ rm -rf dist
 rm -rf build
 rm -rf main.spec
 python -m PyInstaller --onefile main.py
+mv dist/main dist/ftputil
