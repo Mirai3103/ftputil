@@ -2,3 +2,7 @@ build
 __pycache__
 dist
 *.spec
+main.build
+dist1
+main.dist
+main.onefile-build
