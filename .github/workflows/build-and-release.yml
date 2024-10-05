@@ -33,7 +33,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ftputil
-          path: dist/ftputil  # Upload file thực thi dist/ftputil
+          path: ftputil  # Upload file thực thi dist/ftputil
   
   release:
     needs: build
