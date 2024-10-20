@@ -30,4 +30,10 @@
       - **Xem cấu hình FTP**: Xem cấu hình của dịch vụ FTP.
       - **Quản lý người dùng**: Xem DS, Thêm, xóa, sửa người dùng FTP. Cấu hình người dùng anonymous, Cấu hình thư mục
    
-## Sử dụng
+## Demo
+- Menu chính
+![alt text](./images/image.png)
+- Cài đặt FTP, Thêm người dùng
+![alt text](./images/b2.png)
+- Kết quả
+![alt text](./images/rest.png)
