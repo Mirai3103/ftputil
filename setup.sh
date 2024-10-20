@@ -12,4 +12,3 @@ python -m PyInstaller --onefile main.py
 sudo chmod +x ./dist/main
 sudo cp ./dist/main /usr/sbin/ftputil
 mv ./dist/main /usr/local/bin/ftputil
-rm -rf temp
