@@ -1,7 +1,7 @@
 REPO="https://github.com/Mirai3103/ftputil.git"
 # Clone the repository
 rm -rf temp
-git clone $REPO temp
+git clone --depth 1 $REPO temp
 cd temp
 # Install required packages
 pip install -r requirements.txt
