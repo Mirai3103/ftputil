@@ -5,13 +5,8 @@ from InquirerPy.base.control import Choice
 import os
 import requests
 import subprocess
-import sys
-from loguru import logger
 from user import run
 
-logger.remove()
-log_format = "<level>{level}</level>: <level>{message}</level>"
-logger.add(sys.stdout, format=log_format)
 # https://github.com/kazhala/InquirerPy
 def isHasInternet():
     url = "https://www.google.com"
@@ -45,15 +40,15 @@ def isFTPRunning():
     
 def startFTP():
     subprocess.check_call(["sh", "-c", "systemctl start vsftpd"],stdout=subprocess.DEVNULL)
-    logger.info("FTP da khoi dong")
+    print("FTP đã khởi động")
     
 def stopFTP():
     subprocess.check_call(["sh", "-c", "systemctl stop vsftpd"],stdout=subprocess.DEVNULL)
-    logger.info("FTP da dung lai")
+    print("FTP đã dừng")
     
 def removeFTP():
     subprocess.check_call(["sh", "-c", "yum remove vsftpd -y"],stdout=subprocess.DEVNULL)
-    logger.info("FTP da bi go bo")
+    print("FTP đã được gỡ bỏ")
     
 
 def isRoot():
@@ -73,12 +68,12 @@ def initConfig():
                 f.write("anonymous_enable=YES\n")
             else:
                 f.write(line)
-    logger.info("Da khoi tao file cau hinh")
+    print("Đã cấu hình xong")
 def setupFTP():
     subprocess.check_call(["sh", "-c", "yum install vsftpd -y"],stdout=subprocess.DEVNULL)
     subprocess.check_call(["sh", "-c", "systemctl enable vsftpd"],stdout=subprocess.DEVNULL)
     subprocess.check_call(["sh", "-c", "systemctl start vsftpd"],stdout=subprocess.DEVNULL)
-    logger.info("FTP da duoc cai dat va khoi dong")
+    print("FTP đã được cài đặt và khởi động")
     initConfig()
 
 
@@ -94,45 +89,40 @@ def viewConfig():
         i += 1
 
 ACTION_MAP = {
-    "Cai dat FTP": setupFTP,
-    "Khoi dong FTP": startFTP,
-    "Dung FTP": stopFTP,
-    "Go bo FTP": removeFTP,
-    "Xem cau hinh FTP": viewConfig,
-    "Quan ly user": run,
+    "Cài đặt FTP": setupFTP,
+    "Khởi động FTP": startFTP,
+    "Dừng FTP": stopFTP,
+    "Gỡ bỏ FTP": removeFTP,
+    "Xem cấu hình FTP": viewConfig,
+    "Quản lý user": run,
 }
-
 
 def main():
     while True:
         if not isCentos() :
-            logger.error("This script only support CentOS")
+            print("Script này chỉ hỗ trợ CentOS")
             return
         if not isRoot():
-            logger.error("Please run this script as root")
+            print("Vui lòng chạy script này với quyền root")
             return
         if not isHasInternet():
-            logger.error("Please check your internet connection")
+            print("Vui lòng kiểm tra kết nối internet của bạn")
             return
-        selections = ["Quan ly user","Quan ly file","Xem log"]
-        logger.info("Kiem tra FTP")
+        selections = ["Quản lý user", "Quản lý file", "Xem log"]
+        print("Kiểm tra FTP")
         if isFTPInstalled():
-            selections.insert(0, "Go bo FTP")
-            selections.insert(1, "Xem cau hinh FTP")
+            selections.insert(0, "Gỡ bỏ FTP")
+            selections.insert(1, "Xem cấu hình FTP")
             if isFTPRunning():
-                selections.insert(1, "Dung FTP")
+                selections.insert(1, "Dừng FTP")
             else:
-                selections.insert(1, "Khoi dong FTP")
-                
+                selections.insert(1, "Khởi động FTP")
         else:
-            selections = ["Cai dat FTP"]
-            
-            
-            
-        choice =Choice(value=None,name="Thoat")
+            selections = ["Cài đặt FTP"]
+        choice =Choice(value=None,name="Thoát")
         selections.append(choice)
         action = inquirer.rawlist(
-            message="Chon chuc nang",
+            message="Chọn chức năng",
             choices=selections,
             default=None
         ).execute()
@@ -141,7 +131,7 @@ def main():
         if action_func:
             action_func()
         else:
-            logger.info("Thoat chuong trinh")
+            print("Thoát")
             return
     
 

@@ -8,10 +8,7 @@ from __future__ import print_function, unicode_literals
 from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
 import os
-import requests
 import subprocess
-import sys
-from loguru import logger
 import stat
 from util import changeOrAddConfig
 
@@ -20,22 +17,22 @@ chroot_list_path = "/etc/vsftpd/chroot_list"
     
 
 def changeAnonymousUser():
-    name = inquirer.filepath(message="Nhap duong dan thu muc chua file can chia se", validate=lambda result: os.path.isdir(result) or "Duong dan khong ton tai",default='~/').execute()
+    name = inquirer.filepath(message="Nhập đường dẫn thư mục chứa file cần chia sẻ", validate=lambda result: os.path.isdir(result) or "Đường dẫn không tồn tại", default='~/').execute()
     permission = inquirer.checkbox(
-        message="Chon quyen truy cap",
+        message="Chọn quyền truy cập",
 
         choices=[
-            Choice(stat.S_IROTH, " Read"),
-            Choice(stat.S_IWOTH, " Write"),
-            Choice(stat.S_IXOTH, " Execute"),
+            Choice(stat.S_IROTH, " Đọc"),
+            Choice(stat.S_IWOTH, " Ghi"),
+            Choice(stat.S_IXOTH, " Thực thi"),
             Choice(stat.S_IROTH|stat.S_IWOTH|stat.S_IXOTH, "All" )
             
         ],
         default=[stat.S_IROTH],
-        validate=lambda result: len(result) > 0 or "Chon it nhat 1 quyen"
+        validate=lambda result: len(result) > 0 or "Chọn ít nhất một quyền"
     ).execute()
     #  nếu choice include all thì chỉ lấy all
-    logger.info(f"Quyen truy cap: {permission}")
+    print(f"Quyền truy cập: {permission}")
     perm = stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP 
     perm |= stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR
     for p in permission:
@@ -43,7 +40,7 @@ def changeAnonymousUser():
     if not os.path.exists(name):
       
         os.makedirs(name)
-        logger.info(f"Thu muc {name} da duoc tao voi quyen {perm}")
+        print(f"Thư mục {name} đã được tạo với quyền {perm}")
     os.chmod(name, perm)
     changeOrAddConfig("anonymous_enable", "YES", "/etc/vsftpd/vsftpd.conf")
     changeOrAddConfig("anon_root", name, "/etc/vsftpd/vsftpd.conf")
@@ -53,23 +50,23 @@ def changeAnonymousUser():
     changeOrAddConfig("write_enable", "YES", "/etc/vsftpd/vsftpd.conf")
     changeOrAddConfig("allow_writeable_chroot", "YES", "/etc/vsftpd/vsftpd.conf")
     subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
-    logger.info("FTP da duoc khoi dong lai")
+    print("FTP đã được khởi động lại")
     
 def turnOnAnonymousUser():
     changeOrAddConfig("anonymous_enable", "YES", "/etc/vsftpd/vsftpd.conf")
     subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
-    logger.info("FTP da duoc khoi dong lai")
+    print("FTP đã được khởi động lại")
 def turnOffAnonymousUser():
     changeOrAddConfig("anonymous_enable", "NO", "/etc/vsftpd/vsftpd.conf")
     subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
-    logger.info("FTP da duoc khoi dong lai")
+    print("FTP đã được khởi động lại")
 
 def enableLocalUser():
     changeOrAddConfig("chroot_local_user", "YES", "/etc/vsftpd/vsftpd.conf")
     changeOrAddConfig("chroot_list_enable", "YES", "/etc/vsftpd/vsftpd.conf")
     changeOrAddConfig("chroot_list_file", chroot_list_path, "/etc/vsftpd/vsftpd.conf")
     subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
-    logger.info("FTP da duoc khoi dong lai")
+    print("FTP đã được khởi động lại")
 def getUserList():
     # lấy user từ passwd
     user_list = []
@@ -99,19 +96,19 @@ def chooseUserToFtp():
         cycle=True,
     ).execute()
     # join bang dau phay
-    logger.info(f"Da chon user: {', '.join(user)}")
+    print(f"dã chọn user: {', '.join(user)}")
     # //todo: thêm user vào ftp
     replaceUserToFtp(user)
     return user
 
 def addNewUser():
     # tạo user mới cho local
-    user = inquirer.text(message="Nhap ten user", validate=lambda result: result not in getUserList() or "User da ton tai").execute()
-    password = inquirer.secret(message="Nhap mat khau").execute()
+    user = inquirer.text(message="Nhập tên user", validate=lambda result: result not in getUserList() or "User đã tồn tại").execute()
+    password = inquirer.secret(message="Nhập mật khẩu").execute()
     subprocess.check_call(["useradd", "-m", user],stdout=subprocess.DEVNULL)
     subprocess.check_call(["sh", "-c", f"echo {user}:{password} | chpasswd"],stdout=subprocess.DEVNULL)
     newUserId = subprocess.check_output(["id", "-u", user]).decode().strip()
-    homeDir = inquirer.filepath(message="Nhap duong dan thu muc home", default=f"/home/{user}").execute()
+    homeDir = inquirer.filepath(message="Nhập đường dẫn thư mục home", default=f"/home/{user}").execute()
     if not os.path.exists(homeDir):
         os.makedirs(homeDir)
     os.chown(homeDir, int(newUserId), -1)
@@ -119,8 +116,8 @@ def addNewUser():
     
     subprocess.check_call(["usermod","-m", "-d", homeDir, user],stdout=subprocess.DEVNULL)
     os.chmod(homeDir, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
-    logger.info(f"Da tao user {user}")
-    isYes = inquirer.confirm(message="Ban co muon them user nay vao FTP khong?",default=True).execute()
+    print(f"User {user} đã được tạo")
+    isYes = inquirer.confirm(message="Bạn có muốn thêm user này vào FTP không?", default=True).execute()
     if isYes:
         addUserToFtp([user])
 def addUserToFtp(user):
@@ -128,13 +125,13 @@ def addUserToFtp(user):
         for u in user:
             f.write(u + "\n")
     subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
-    logger.info("FTP da duoc khoi dong lai")
+    print("FTP đã được khởi động lại")
 def replaceUserToFtp(user):
     with open(chroot_list_path, "w") as f:
         for u in user:
             f.write(u + "\n")
     subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
-    logger.info("FTP da duoc khoi dong lai")
+    print("FTP đã được khởi động lại")
     
 def getConfig(key):
     with open("/etc/vsftpd/vsftpd.conf", "r") as f:
@@ -145,38 +142,37 @@ def getConfig(key):
     return None
     
 ACTIONS_MAP = {
-    "Them user": addNewUser,
-    "Them/Xoa user FTP":  chooseUserToFtp,
-    "Tat user anonymous": turnOffAnonymousUser,
-    "Bat user anonymous": turnOnAnonymousUser,
-    "Thay doi quyen truy cap anonymous": changeAnonymousUser
+    "Thêm user": addNewUser,
+    "Thêm/Xóa user FTP": chooseUserToFtp,
+    "Tắt user anonymous": turnOffAnonymousUser,
+    "Bật user anonymous": turnOnAnonymousUser,
+    "Thay đổi quyền truy cập anonymous": changeAnonymousUser
 }
 
 def run():
     
     while True:
-        selections = ["Them/Xoa user FTP","Them user"]
+        selections = ["Thêm/Xóa user FTP", "Thêm user"]
         if getConfig("anonymous_enable") == "YES":
-            selections.insert(0, "Tat user anonymous")
-            selections.insert(1, "Thay doi quyen truy cap anonymous")
+            selections.insert(0, "Tắt user anonymous")
+            selections.insert(1, "Thay đổi quyền truy cập anonymous")
         else:
-            selections.insert(0, "Bat user anonymous")
+            selections.insert(0, "Bật user anonymous")
         if getConfig("chroot_local_user") != "YES":
             enableLocalUser()
-        choice =Choice(value=None,name="Thoat")
+        choice = Choice(value=None, name="Thoát")
         selections.append(choice)
         action = inquirer.select(
-            message="Chon hanh dong",
+            message="Chọn hành động",
             choices=selections,
             default=None,
             cycle=True,
         ).execute()
         if action is None:
-            logger.info("Thoat quan ly user")
+            print("Thoát quản lý user")
             return
         action = ACTIONS_MAP[action]
         action()
-        
         
 
 if __name__ == "__main__":
