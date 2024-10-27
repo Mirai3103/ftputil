@@ -11,3 +11,11 @@ def changeOrAddConfig(key, value,file):
     if not isExist:
         with open(file, "a") as f:
             f.write(f"{key}={value}\n")
+            
+def getConfig(key):
+    with open("/etc/vsftpd/vsftpd.conf", "r") as f:
+        lines = f.readlines()
+    for line in lines:
+        if line.startswith(key+"="):
+            return line.split("=")[1].strip()
+    return None

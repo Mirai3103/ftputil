@@ -6,6 +6,8 @@ import os
 import requests
 import subprocess
 from user import run
+from util import changeOrAddConfig,getConfig
+from advance import changeFolderPermission
 
 # https://github.com/kazhala/InquirerPy
 def isHasInternet():
@@ -87,6 +89,33 @@ def viewConfig():
             continue
         print(f"{line}",end="")
         i += 1
+        
+def disableAnonymousUpload():
+    changeOrAddConfig("anon_upload_enable","NO","/etc/vsftpd/vsftpd.conf")
+    changeOrAddConfig("anon_mkdir_write_enable","NO","/etc/vsftpd/vsftpd.conf")
+    subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
+    print("FTP đã được khởi động lại")
+    
+def enableAnonymousUpload():
+    changeOrAddConfig("anon_upload_enable","YES","/etc/vsftpd/vsftpd.conf")
+    changeOrAddConfig("anon_mkdir_write_enable","YES","/etc/vsftpd/vsftpd.conf")
+    subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
+    print("FTP đã được khởi động lại")
+  
+def isAllowAnonymousUpload():
+    return getConfig("anon_upload_enable") == "YES"  
+    
+def disableUpload():
+    changeOrAddConfig("write_enable","NO","/etc/vsftpd/vsftpd.conf")
+    subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
+    print("FTP đã được khởi động lại")
+def enableUpload():
+    changeOrAddConfig("write_enable","YES","/etc/vsftpd/vsftpd.conf")
+    subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
+    print("FTP đã được khởi động lại")
+
+def isAllowUpload():
+    return getConfig("write_enable") == "YES"
 
 ACTION_MAP = {
     "Cài đặt FTP": setupFTP,
@@ -95,6 +124,12 @@ ACTION_MAP = {
     "Gỡ bỏ FTP": removeFTP,
     "Xem cấu hình FTP": viewConfig,
     "Quản lý user": run,
+    "Bật upload ẩn danh": enableAnonymousUpload,
+    "Tắt upload ẩn danh": disableAnonymousUpload,
+    "Bật upload người dùng local": enableUpload,
+    "Tắt upload người dùng local": disableUpload,
+    'Thay đổi quyền truy cập thư mục': changeFolderPermission
+    
 }
 
 def main():
@@ -108,7 +143,7 @@ def main():
         if not isHasInternet():
             print("Vui lòng kiểm tra kết nối internet của bạn")
             return
-        selections = ["Quản lý user", "Quản lý file", "Xem log"]
+        selections = ["Quản lý user"]
         print("Kiểm tra FTP")
         if isFTPInstalled():
             selections.insert(0, "Gỡ bỏ FTP")
@@ -119,6 +154,9 @@ def main():
                 selections.insert(1, "Khởi động FTP")
         else:
             selections = ["Cài đặt FTP"]
+        selections.append("Bật upload ẩn danh" if not isAllowAnonymousUpload() else "Tắt upload ẩn danh")
+        selections.append("Bật upload người dùng local" if not isAllowUpload() else "Tắt upload người dùng local")
+        selections.append("Thay đổi quyền truy cập thư mục")
         choice =Choice(value=None,name="Thoát")
         selections.append(choice)
         action = inquirer.rawlist(
