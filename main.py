@@ -7,7 +7,7 @@ import requests
 import subprocess
 from user import run
 from util import changeOrAddConfig,getConfig
-from advance import changeFolderPermission
+from advance import folderManager
 
 # https://github.com/kazhala/InquirerPy
 def isHasInternet():
@@ -128,8 +128,7 @@ ACTION_MAP = {
     "Tắt upload ẩn danh": disableAnonymousUpload,
     "Bật upload người dùng local": enableUpload,
     "Tắt upload người dùng local": disableUpload,
-    'Thay đổi quyền truy cập thư mục': changeFolderPermission
-    
+    'Quản lý thư mục': folderManager
 }
 
 def main():
@@ -156,7 +155,7 @@ def main():
             selections = ["Cài đặt FTP"]
         selections.append("Bật upload ẩn danh" if not isAllowAnonymousUpload() else "Tắt upload ẩn danh")
         selections.append("Bật upload người dùng local" if not isAllowUpload() else "Tắt upload người dùng local")
-        selections.append("Thay đổi quyền truy cập thư mục")
+        selections.append("Quản lý thư mục")
         choice =Choice(value=None,name="Thoát")
         selections.append(choice)
         action = inquirer.rawlist(

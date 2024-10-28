@@ -159,7 +159,7 @@ ACTIONS_MAP = {
     "Thêm/Xóa user FTP": chooseUserToFtp,
     "Tắt user anonymous": turnOffAnonymousUser,
     "Bật user anonymous": turnOnAnonymousUser,
-    "Thay đổi quyền truy cập anonymous": changeAnonymousUser,
+    "Thay đổi thư mục anonymous": changeAnonymousUser,
     'Bật cho phép người dùng đăng nhập': enableLocalUser,
     'Tắt cho phép người dùng đăng nhập': disableLocalUser,
     
@@ -171,7 +171,7 @@ def run():
         selections = ["Thêm/Xóa user FTP", "Thêm user"]
         if getConfig("anonymous_enable") == "YES":
             selections.insert(0, "Tắt user anonymous")
-            selections.insert(1, "Thay đổi quyền truy cập anonymous")
+            selections.insert(1, "Thay đổi thư mục anonymous")
         else:
             selections.insert(0, "Bật user anonymous")
         if getConfig("chroot_local_user") != "YES":
