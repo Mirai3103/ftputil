@@ -135,7 +135,14 @@ def createGroup():
     if isAddUser:
         addUserToGroup(group)
         
-def addUserToGroup(group):
+def addUserToGroup(group=None):
+    if group is None:
+        group = inquirer.fuzzy(
+            message="Chọn nhóm",
+            choices=[Choice(x,x) for x in getListGroup()],
+            default="",
+            multiselect=False
+        ).execute()
     choices= [Choice(x,x) for x in getListUser()]
     listUserOfGr = getListUserOfGroup(group)
     for user in listUserOfGr:
