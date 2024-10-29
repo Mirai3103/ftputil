@@ -27,8 +27,8 @@
       - **Khởi động FTP**: Khởi động dịch vụ FTP.
       - **Dừng FTP**: Dừng dịch vụ FTP.
       - **Gỡ bỏ FTP**: Gỡ bỏ dịch vụ FTP.
-      - **Xem cấu hình FTP**: Xem cấu hình của dịch vụ FTP.
       - **Quản lý người dùng**: Xem DS, Thêm, xóa, sửa người dùng FTP. Cấu hình người dùng anonymous, Cấu hình thư mục
+      - **Quản lý thư mục** Tạo, Xoá, Phân quyền thư mục
    
 ## Demo
 - Menu chính
