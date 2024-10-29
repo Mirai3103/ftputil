@@ -153,8 +153,11 @@ def main():
                 selections.insert(1, "Khởi động FTP")
         else:
             selections = ["Cài đặt FTP"]
-        selections.append("Bật upload ẩn danh" if not isAllowAnonymousUpload() else "Tắt upload ẩn danh")
-        selections.append("Bật upload người dùng local" if not isAllowUpload() else "Tắt upload người dùng local")
+        try:
+            selections.append("Bật upload ẩn danh" if not isAllowAnonymousUpload() else "Tắt upload ẩn danh")
+            selections.append("Bật upload người dùng local" if not isAllowUpload() else "Tắt upload người dùng local")
+        except:
+            pass
         selections.append("Quản lý thư mục")
         choice =Choice(value=None,name="Thoát")
         selections.append(choice)
