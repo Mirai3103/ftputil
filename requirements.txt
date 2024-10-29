@@ -1,6 +1,3 @@
 InquirerPy
 loguru
 requests
-pyinstaller
-cx_Freeze
-nuitka
