@@ -41,6 +41,7 @@ def isFTPRunning():
         return False
     
 def startFTP():
+    initConfig()
     subprocess.check_call(["sh", "-c", "systemctl start vsftpd"],stdout=subprocess.DEVNULL)
     print("FTP đã khởi động")
     
@@ -62,7 +63,7 @@ def initConfig():
         lines = f.readlines()
     with open("/etc/vsftpd/vsftpd.conf", "w") as f:
         for line in lines:
-            if  line.startswith("#listen=") or line.startswith("listen-"):
+            if  line.startswith("#listen=") or line.startswith("listen="):
                 f.write("listen=YES\n")
             elif line.startswith("#listen_ipv6") or line.startswith("listen_ipv6"):
                 f.write("listen_ipv6=NO\n")
