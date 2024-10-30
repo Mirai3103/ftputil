@@ -177,8 +177,6 @@ def run():
             selections.insert(1, "Thay đổi thư mục anonymous")
         else:
             selections.insert(0, "Bật user anonymous")
-        if getConfig("chroot_local_user") != "YES":
-            enableLocalUser()
         selections.append("Bật cho phép người dùng đăng nhập" if not isAllowLocalUser() else "Tắt cho phép người dùng đăng nhập")
         
         choice = Choice(value=None, name="Thoát")
