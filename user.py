@@ -54,8 +54,9 @@ def changeAnonymousUser():
     
 def turnOnAnonymousUser():
     changeOrAddConfig("anonymous_enable", "YES", "/etc/vsftpd/vsftpd.conf")
-    subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
     changeOrAddConfig("allow_writeable_chroot", "YES", "/etc/vsftpd/vsftpd.conf")
+    subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
+
     print("FTP đã được khởi động lại")
 def turnOffAnonymousUser():
     changeOrAddConfig("anonymous_enable", "NO", "/etc/vsftpd/vsftpd.conf")
