@@ -118,7 +118,7 @@ def getListUserOfGroup(group):
 
 
 def createFolder():
-    path = inquirer.path(message="Nhập đường dẫn thư mục", validate=lambda result: not os.path.exists(result) or "Thư mục đã tồn tại").execute()
+    path = inquirer.filepath(message="Nhập đường dẫn thư mục", validate=lambda result: not os.path.exists(result) or "Thư mục đã tồn tại").execute()
     os.makedirs(path)
     print(f"Thư mục {path} đã được tạo")
     print("Bạn có muốn cập nhật quyền truy cập không?")
