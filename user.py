@@ -55,6 +55,12 @@ def changeAnonymousUser():
 def turnOnAnonymousUser():
     changeOrAddConfig("anonymous_enable", "YES", "/etc/vsftpd/vsftpd.conf")
     changeOrAddConfig("allow_writeable_chroot", "YES", "/etc/vsftpd/vsftpd.conf")
+    listUser = getFtpUserList()
+    listUser.append("anonymous")
+    replaceUserToFtp(listUser)
+    listChroot = getChrootUserList()
+    listChroot.append("anonymous")
+    replaceUserFromChroot(listChroot)
     subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
 
     print("FTP đã được khởi động lại")
@@ -91,6 +97,8 @@ def getUserList():
     with open("/etc/passwd", "r") as f:
         for line in f:
             user_list.append(line.split(":")[0])
+    
+    user_list.append("anonymous")
     return user_list
 
 def getFtpUserList():
@@ -201,7 +209,7 @@ def replaceUserFromChroot(user):
             f.write(u + "\n")
     subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
     print("FTP đã được khởi động lại")
-    
+
     
 ACTIONS_MAP = {
     "Thêm user": addNewUser,

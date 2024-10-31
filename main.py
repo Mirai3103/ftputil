@@ -50,6 +50,7 @@ def stopFTP():
     print("FTP đã dừng")
     
 def removeFTP():
+    subprocess.check_call(["rm", "-rf", "/etc/vsftpd/vsftpd.conf"],stdout=subprocess.DEVNULL)
     subprocess.check_call(["sh", "-c", "yum remove vsftpd -y"],stdout=subprocess.DEVNULL)
     print("FTP đã được gỡ bỏ")
     
@@ -73,6 +74,9 @@ def initConfig():
                 f.write(line)
     print("Đã cấu hình xong")
 def setupFTP():
+    if not isHasInternet():
+        print("Vui lòng kiểm tra kết nối internet của bạn")
+        return
     subprocess.check_call(["sh", "-c", "yum install vsftpd -y"],stdout=subprocess.DEVNULL)
     subprocess.check_call(["sh", "-c", "systemctl enable vsftpd"],stdout=subprocess.DEVNULL)
     subprocess.check_call(["sh", "-c", "systemctl start vsftpd"],stdout=subprocess.DEVNULL)
@@ -140,9 +144,7 @@ def main():
         if not isRoot():
             print("Vui lòng chạy script này với quyền root")
             return
-        if not isHasInternet():
-            print("Vui lòng kiểm tra kết nối internet của bạn")
-            return
+
         selections = ["Quản lý user"]
         print("Kiểm tra FTP")
         if isFTPInstalled():
