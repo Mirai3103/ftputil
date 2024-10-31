@@ -12,24 +12,24 @@ import subprocess
 PERMISSIONS_DISPLAY_DICT = {
     stat.S_IRUSR: "Chủ sở hữu có quyền đọc",
     stat.S_IWUSR: "Chủ sở hữu có quyền ghi",
-    stat.S_IXUSR: "Chủ sở hữu có quyền thực thi",
+    stat.S_IXUSR: "Chủ sở hữu có quyền truy cập",
     stat.S_IRGRP: "Nhóm có quyền đọc",
     stat.S_IWGRP: "Nhóm có quyền ghi",
-    stat.S_IXGRP: "Nhóm có quyền thực thi",
+    stat.S_IXGRP: "Nhóm có quyền truy cập",
     stat.S_IROTH: "Người khác có quyền đọc",
     stat.S_IWOTH: "Người khác có quyền ghi",
-    stat.S_IXOTH: "Người khác có quyền thực thi"
+    stat.S_IXOTH: "Người khác có quyền truy cập"
 }
 PEM_CHOICES = [
     Choice(stat.S_IRUSR, "Chủ sở hữu có quyền đọc"),
     Choice(stat.S_IWUSR, "Chủ sở hữu có quyền ghi"),
-    Choice(stat.S_IXUSR, "Chủ sở hữu có quyền thực thi"),
+    Choice(stat.S_IXUSR, "Chủ sở hữu có quyền truy cập"),
     Choice(stat.S_IRGRP, "Nhóm có quyền đọc"),
     Choice(stat.S_IWGRP, "Nhóm có quyền ghi"),
-    Choice(stat.S_IXGRP, "Nhóm có quyền thực thi"),
+    Choice(stat.S_IXGRP, "Nhóm có quyền truy cập"),
     Choice(stat.S_IROTH, "Người khác có quyền đọc"),
     Choice(stat.S_IWOTH, "Người khác có quyền ghi"),
-    Choice(stat.S_IXOTH, "Người khác có quyền thực thi")
+    Choice(stat.S_IXOTH, "Người khác có quyền truy cập")
 ]
 PEM_MAP_TO_UNIX = {
     stat.S_IRUSR: 400,
@@ -118,7 +118,7 @@ def getListUserOfGroup(group):
 
 
 def createFolder():
-    path = inquirer.text(message="Nhập đường dẫn thư mục mới", validate=lambda result: not os.path.exists(result) or "Thư mục đã tồn tại", default='~/').execute()
+    path = inquirer.path(message="Nhập đường dẫn thư mục", validate=lambda result: not os.path.exists(result) or "Thư mục đã tồn tại").execute()
     os.makedirs(path)
     print(f"Thư mục {path} đã được tạo")
     print("Bạn có muốn cập nhật quyền truy cập không?")

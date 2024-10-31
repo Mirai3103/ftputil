@@ -14,7 +14,7 @@ from util import changeOrAddConfig,getConfig
 
 
 chroot_list_path = "/etc/vsftpd/chroot_list"
-    
+userList ='/etc/vsftpd/user_list'
 
 def changeAnonymousUser():
     name = inquirer.filepath(message="Nhập đường dẫn thư mục chứa file cần chia sẻ", validate=lambda result: os.path.isdir(result) or "Đường dẫn không tồn tại", default='~/').execute()
@@ -34,7 +34,7 @@ def changeAnonymousUser():
     #  nếu choice include all thì chỉ lấy all
     # print(f"Quyền truy cập: {permission}")
     perm = stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP 
-    perm |= stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH
+    perm |= stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |stat.S_IROTH|stat.S_IXOTH
     # for p in permission:
     #         perm |= p
     if not os.path.exists(name):
@@ -67,6 +67,7 @@ def turnOffAnonymousUser():
 def enableLocalUser():
     changeOrAddConfig("chroot_local_user", "YES", "/etc/vsftpd/vsftpd.conf")
     changeOrAddConfig("chroot_list_enable", "YES", "/etc/vsftpd/vsftpd.conf")
+    changeOrAddConfig("local_enable", "YES", "/etc/vsftpd/vsftpd.conf")
     changeOrAddConfig("chroot_list_file", chroot_list_path, "/etc/vsftpd/vsftpd.conf")
     subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
     print("FTP đã được khởi động lại")
@@ -74,6 +75,9 @@ def enableLocalUser():
 def disableLocalUser():
     changeOrAddConfig("chroot_local_user", "NO", "/etc/vsftpd/vsftpd.conf")
     changeOrAddConfig("chroot_list_enable", "NO", "/etc/vsftpd/vsftpd.conf")
+    changeOrAddConfig("local_enable", "NO", "/etc/vsftpd/vsftpd.conf")
+    changeOrAddConfig("chroot_list_file", 'a', "/etc/vsftpd/vsftpd.conf")
+    
     subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
     print("FTP đã được khởi động lại")
     
@@ -90,11 +94,11 @@ def getUserList():
     return user_list
 
 def getFtpUserList():
-    if not os.path.exists(chroot_list_path):
-        with open(chroot_list_path, "w") as f:
+    if not os.path.exists(userList):
+        with open(userList, "w") as f:
             pass
     user_list = []
-    with open(chroot_list_path, "r") as f:
+    with open(userList, "r") as f:
         for line in f:
             user_list.append(line.strip())
     return user_list
@@ -113,7 +117,7 @@ def chooseUserToFtp():
                 break
     #  tạo select để chọn user, danh sách user là user_list, default là user trong ftp_user_list
     user = inquirer.checkbox(
-        message="Chon user",
+        message="Chọn user",
         choices=choices,
         default=selectedChoices,
         cycle=True,
@@ -143,23 +147,66 @@ def addNewUser():
     if isYes:
         addUserToFtp([user])
 def addUserToFtp(user):
-    with open(chroot_list_path, "a") as f:
+    with open(userList, "a") as f:
         for u in user:
             f.write(u + "\n")
     subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
     print("FTP đã được khởi động lại")
 def replaceUserToFtp(user):
+    with open(userList, "w") as f:
+        for u in user:
+            f.write(u + "\n")
+    subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
+    print("FTP đã được khởi động lại")
+    
+#  it work like chooseUserToFtp but for chroot_list_file
+def getChrootUserList():
+    if not os.path.exists(chroot_list_path):
+        with open(chroot_list_path, "w") as f:
+            pass
+    user_list = []
+    with open(chroot_list_path, "r") as f:
+        for line in f:
+            user_list.append(line.strip())
+    return user_list
+
+    
+def chooseUserToChroot():
+    user_list = getUserList()
+
+    ftp_user_list = getChrootUserList()
+    choices = [Choice(user, user) for user in user_list]
+    selectedChoices = []
+    for user in choices:
+        for ftp_user in ftp_user_list:
+            if user.value == ftp_user:
+                user.enabled = True
+                selectedChoices.append(user)
+                break
+    #  tạo select để chọn user, danh sách user là user_list, default là user trong ftp_user_list
+    user = inquirer.checkbox(
+        message="Chọn user",
+        choices=choices,
+        default=selectedChoices,
+        cycle=True,
+    ).execute()
+
+    # join bang dau phay
+    print(f"dã chọn user: {', '.join(user)}")
+    replaceUserFromChroot(user)
+    
+def replaceUserFromChroot(user):
     with open(chroot_list_path, "w") as f:
         for u in user:
             f.write(u + "\n")
     subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
     print("FTP đã được khởi động lại")
     
-
     
 ACTIONS_MAP = {
     "Thêm user": addNewUser,
     "Thêm/Xóa user FTP": chooseUserToFtp,
+    "Danh sách user truy cập mặc định home": chooseUserToChroot,
     "Tắt user anonymous": turnOffAnonymousUser,
     "Bật user anonymous": turnOnAnonymousUser,
     "Thay đổi thư mục anonymous": changeAnonymousUser,
@@ -169,9 +216,11 @@ ACTIONS_MAP = {
 }
 
 def run():
-    
+    # cho phép user đăng nhập
+    changeOrAddConfig('userlist_enable', 'YES', '/etc/vsftpd/vsftpd.conf')
+    changeOrAddConfig('userlist_deny', 'NO', '/etc/vsftpd/vsftpd.conf')
     while True:
-        selections = ["Thêm/Xóa user FTP", "Thêm user"]
+        selections = ["Thêm/Xóa user FTP", "Thêm user", "Danh sách user truy cập mặc định home"]
         if getConfig("anonymous_enable") == "YES":
             selections.insert(0, "Tắt user anonymous")
             selections.insert(1, "Thay đổi thư mục anonymous")
