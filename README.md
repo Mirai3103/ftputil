@@ -32,7 +32,12 @@
    
 ## Demo
 - Menu chính
-![alt text](./images/image.png)
+![alt text](./images/image1.png)
+![alt text](./images/image2.png)
+![alt text](./images/image3.png)
+![alt text](./images/image4.png)
+
+
 - Cài đặt FTP, Thêm người dùng
 ![alt text](./images/b2.png)
 - Kết quả
