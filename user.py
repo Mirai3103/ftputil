@@ -124,11 +124,12 @@ def chooseUserToFtp():
                 selectedChoices.append(user)
                 break
     #  tạo select để chọn user, danh sách user là user_list, default là user trong ftp_user_list
-    user = inquirer.checkbox(
+    user = inquirer.fuzzy(
         message="Chọn user",
         choices=choices,
-        default=selectedChoices,
+        default="",
         cycle=True,
+        multiselect=True
     ).execute()
 
     # join bang dau phay
@@ -224,6 +225,7 @@ ACTIONS_MAP = {
 }
 
 def run():
+    os.system('clear')
     # cho phép user đăng nhập
     changeOrAddConfig('userlist_enable', 'YES', '/etc/vsftpd/vsftpd.conf')
     changeOrAddConfig('userlist_deny', 'NO', '/etc/vsftpd/vsftpd.conf')

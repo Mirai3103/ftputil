@@ -138,6 +138,7 @@ ACTION_MAP = {
 
 def main():
     while True:
+        os.system('clear')
         if not isCentos() :
             print("Script này chỉ hỗ trợ CentOS")
             return

@@ -31,26 +31,7 @@ PEM_CHOICES = [
     Choice(stat.S_IWOTH, "Người khác có quyền ghi"),
     Choice(stat.S_IXOTH, "Người khác có quyền truy cập")
 ]
-PEM_MAP_TO_UNIX = {
-    stat.S_IRUSR: 400,
-    stat.S_IWUSR: 200,
-    stat.S_IXUSR: 100,
-    stat.S_IRGRP: 40,
-    stat.S_IWGRP: 20,
-    stat.S_IXGRP: 10,
-    stat.S_IROTH: 4,
-    stat.S_IWOTH: 2,
-    stat.S_IXOTH: 1
-}
-def getUnixPermission(permissions):
-    result = 0
-    for p in permissions:
-        result += PEM_MAP_TO_UNIX[p]
-    if result < 10:
-        return f"00{result}"
-    if result < 100:
-        return f"0{result}"
-    return result
+
 
 
 
@@ -58,6 +39,8 @@ def getPermissionsChoice(path):
     st = os.stat(path)
     # copy list
     choices = PEM_CHOICES.copy()
+    for choice in choices:
+        choice.enabled = False
     for key in PERMISSIONS_DISPLAY_DICT:
         if st.st_mode & key:
             for choice in choices:
@@ -78,12 +61,20 @@ def changeFolderPermission(path= None):
     perm = 0
     for p in permission:
         perm |= p
-    unixCode =getUnixPermission(permissions=permission)
     isApplyToAll = inquirer.confirm(message="Áp dụng cho tất cả thư mục con", default=False).execute()
+    os.chmod(path, perm)
     if isApplyToAll:
-        subprocess.check_call(["sh", "-c", f"chmod -R {unixCode} {path}"],stdout=subprocess.PIPE)
-    else:
-        os.chmod(path, perm)
+        changeFolderPermissionRecursively(path, perm)
+        
+
+def changeFolderPermissionRecursively(path, perm):
+    for root, dirs, files in os.walk(path):
+        for d in dirs:
+            os.chmod(os.path.join(root, d), perm)
+        for f in files:
+            os.chmod(os.path.join(root, f), perm)
+    print(f"Tất cả thư mục con của {path} đã được cập nhật quyền truy cập")
+
 
 def getListGroup():
     groups = []
@@ -214,6 +205,7 @@ ACTIONS_MAP={
 
 def folderManager():
     while True:
+        os.system('clear')
         action = inquirer.select(
             message="Chọn hành động",
             choices=ACTION_CHOICES,
@@ -226,7 +218,8 @@ def folderManager():
         ACTIONS_MAP[action]()
         
 if __name__ == "__main__":
-    folderManager()  
+    # folderManager()  
+    changeFolderPermission()
 
     
     
