@@ -92,20 +92,15 @@ def getListUser():
         users.append(line.split(":")[0])
     return users
 def getListUserOfGroup(group):
-    usersId = []
+    users = []
     with open("/etc/group", "r") as f:
         lines = f.readlines()
     for line in lines:
-        if line.startswith(group):
-            usersId = line.split(":")[2]
+        if line.startswith(group+":"):
+            users = line.split(":")[3].split(",")
             break
-    users = []
-    with open("/etc/passwd", "r") as f:
-        lines = f.readlines()
-    for line in lines:
-        if line.split(":")[2] in usersId:
-            users.append(line.split(":")[0])
-    return users
+
+    return [user.rstrip() for user in users]
 
 
 def createFolder():
@@ -155,7 +150,10 @@ def addUserToGroup(group=None):
 def removeAllUserFromGroup(group):
     users = getListUserOfGroup(group)
     for user in users:
-        subprocess.check_call(["sh", "-c", f"gpasswd -d {user} {group}"],stdout=subprocess.PIPE)
+        try:
+            subprocess.check_call(["sh", "-c", f"gpasswd -d {user} {group}"],stdout=subprocess.PIPE)
+        except:
+            pass
     print(f"Tất cả người dùng đã được xóa khỏi nhóm {group}")
            
         
