@@ -211,6 +211,25 @@ def replaceUserFromChroot(user):
     subprocess.check_call(["sh", "-c", "systemctl restart vsftpd"],stdout=subprocess.DEVNULL)
     print("FTP đã được khởi động lại")
 
+# usermod -d /newhome/username username
+def changeHomeDir():
+    # echo $( getent passwd "laffy" | cut -d: -f6 )
+    user = inquirer.fuzzy(
+        message="Chọn user",
+        choices=[Choice(x,x) for x in getUserList()],
+        default="",
+        multiselect=False
+    ).execute()
+    result = subprocess.getoutput(f'echo $( getent passwd "{user}" | cut -d: -f6 )')
+    result = f"/home/{user}" if result == "" or result is None else result
+    result =result.strip()
+    homeDir = inquirer.filepath(message="Nhập đường dẫn thư mục home", default=result).execute()
+    if not os.path.exists(homeDir):
+        os.makedirs(homeDir)
+    cmd = f"chown -R {user}:{user} {homeDir}"
+    subprocess.check_call(["sh", "-c", cmd],stdout=subprocess.PIPE)
+    subprocess.check_call(["usermod", "-d", homeDir, user],stdout=subprocess.PIPE)
+    print(f"Thư mục home của user {user} đã được thay đổi thành {homeDir}")
     
 ACTIONS_MAP = {
     "Thêm user": addNewUser,
@@ -221,6 +240,7 @@ ACTIONS_MAP = {
     "Thay đổi thư mục anonymous": changeAnonymousUser,
     'Bật cho phép người dùng đăng nhập': enableLocalUser,
     'Tắt cho phép người dùng đăng nhập': disableLocalUser,
+    'Thay đổi thư mục home': changeHomeDir
     
 }
 
@@ -230,7 +250,7 @@ def run():
     changeOrAddConfig('userlist_enable', 'YES', '/etc/vsftpd/vsftpd.conf')
     changeOrAddConfig('userlist_deny', 'NO', '/etc/vsftpd/vsftpd.conf')
     while True:
-        selections = ["Thêm/Xóa user FTP", "Thêm user", "Danh sách user truy cập mặc định home"]
+        selections = ["Thêm/Xóa user FTP", "Thêm user", "Danh sách user truy cập mặc định home", "Thay đổi thư mục home"]
         if getConfig("anonymous_enable") == "YES":
             selections.insert(0, "Tắt user anonymous")
             selections.insert(1, "Thay đổi thư mục anonymous")
