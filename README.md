@@ -8,8 +8,8 @@
 
 - Python 3.x
 - RedHatEnterpriseLinux base distro (eg: Centos, Fedora, Rocky...)
-- Phải có kết nối mạng bên ngoài
-- Đã fix lỗi gói yum
+- Phải có kết nối mạng bên ngoài( để cài ftp, sau khi cài có thể chuyển về mạng nội bộ)
+- Dùng gói yum là package manger && đã fix lỗi gói yum
 ## Cài đặt
 
 1. **Cài đặt**:
