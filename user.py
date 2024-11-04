@@ -234,7 +234,7 @@ def changeHomeDir():
 ACTIONS_MAP = {
     "Thêm user": addNewUser,
     "Thêm/Xóa user FTP": chooseUserToFtp,
-    "Danh sách user truy cập mặc định home": chooseUserToChroot,
+    "Danh sách user không truy cập mặc định home": chooseUserToChroot,
     "Tắt user anonymous": turnOffAnonymousUser,
     "Bật user anonymous": turnOnAnonymousUser,
     "Thay đổi thư mục anonymous": changeAnonymousUser,
@@ -250,7 +250,7 @@ def run():
     changeOrAddConfig('userlist_enable', 'YES', '/etc/vsftpd/vsftpd.conf')
     changeOrAddConfig('userlist_deny', 'NO', '/etc/vsftpd/vsftpd.conf')
     while True:
-        selections = ["Thêm/Xóa user FTP", "Thêm user", "Danh sách user truy cập mặc định home", "Thay đổi thư mục home"]
+        selections = ["Thêm/Xóa user FTP", "Thêm user", "Danh sách user không truy cập mặc định home", "Thay đổi thư mục home"]
         if getConfig("anonymous_enable") == "YES":
             selections.insert(0, "Tắt user anonymous")
             selections.insert(1, "Thay đổi thư mục anonymous")
